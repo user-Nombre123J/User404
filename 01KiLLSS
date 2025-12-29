@@ -1510,6 +1510,165 @@ Players.PlayerAdded:Connect(function(plr)
 	end)
 end)
 
+local estadisticas = window:AddTab("Stats")
+local SelectPlayerName = ""
+
+local PlayerDrop = estadisticas:AddDropdown("Select Player", function(Value)
+    SelectPlayerName = Value:match("| (.+)")
+end)
+
+for _, Plr in pairs(game.Players:GetPlayers()) do
+    PlayerDrop:Add(Plr.DisplayName .. " | " .. Plr.Name)
+end
+
+game.Players.PlayerAdded:Connect(function(Plr)
+    PlayerDrop:Add(Plr.DisplayName .. " | " .. Plr.Name)
+end)
+
+local function FormatNumberWithCommas(number)
+    return tostring(number):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+end
+
+local function FormatAbbreviated(number)
+    local abbr = {"", "K", "M", "B", "T", "Qa", "Qi"}
+    local idx = 1
+    while number >= 1000 and idx < #abbr do
+        number = number / 1000
+        idx += 1
+    end
+    return string.format("%.2f", number) .. abbr[idx]
+end
+
+local function FormatDisplay(value)
+    return "[ " .. FormatNumberWithCommas(value) .. " | " .. FormatAbbreviated(value) .. " ]"
+end
+
+local Update = estadisticas:AddLabel("")
+local Update1 = estadisticas:AddLabel("")
+local Update2 = estadisticas:AddLabel("")
+local Update3 = estadisticas:AddLabel("")
+local Update4 = estadisticas:AddLabel("")
+local Update5 = estadisticas:AddLabel("")
+local Update6 = estadisticas:AddLabel("")
+local Update9 = estadisticas:AddLabel("")
+local Update10 = estadisticas:AddLabel("")
+local Update11 = estadisticas:AddLabel("")
+local Update12 = estadisticas:AddLabel("")
+local Update13 = estadisticas:AddLabel("")
+
+estadisticas:AddLabel("————————————————————————————")
+estadisticas:AddLabel("Stats Advanced").TextSize = 24
+
+local enemyHealthLabel = estadisticas:AddLabel("Enemy life: N/A")
+enemyHealthLabel.TextSize = 20
+enemyHealthLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local playerDamageLabel = estadisticas:AddLabel("Your damage: N/A")
+playerDamageLabel.TextSize = 20
+playerDamageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local hitsToKillLabel = estadisticas:AddLabel("Blows to kill him: N/A")
+hitsToKillLabel.TextSize = 20
+hitsToKillLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local wildWizardLabel = estadisticas:AddLabel("Wild Wizard equipped: 0 (0 bonus)")
+wildWizardLabel.TextSize = 18
+
+local function countEquipped(player, petName)
+    local equipped = player:FindFirstChild("equippedPets")
+    if not equipped then return 0 end
+    local count = 0
+    for _, slot in pairs(equipped:GetChildren()) do
+        if slot:FindFirstChild("petReference") and slot.petReference.Value then
+            local pet = slot.petReference.Value
+            if pet.Name == petName then
+                count += 1
+            end
+        end
+    end
+    return count
+end
+
+local function calculateLocalPlayerDamage()
+    local Player = game.Players.LocalPlayer
+    local strength = Player:FindFirstChild("leaderstats") and Player.leaderstats:FindFirstChild("Strength")
+    if not strength then return 0 end
+
+    local baseDamage = strength.Value * 0.1
+    local wildCount = countEquipped(Player, "Wild Wizard")
+    local wildBonus = wildCount * 0.33
+    wildWizardLabel.Text = "Wild Wizard equipped: "..wildCount.." ("..FormatDisplay(baseDamage*wildBonus).." bonus)"
+
+    return baseDamage * (1 + wildBonus)
+end
+
+local function calculateEnemyHealth(targetPlayer)
+    if not targetPlayer then return 0 end
+    local baseDura = targetPlayer:FindFirstChild("Durability") and targetPlayer.Durability.Value or 0
+    local ultFolder = targetPlayer:FindFirstChild("ultimatesFolder")
+    local multiplier = 1
+    if ultFolder and ultFolder:FindFirstChild("Infernal Health") then
+        multiplier = multiplier + 0.15 * ultFolder["Infernal Health"].Value
+    end
+    return baseDura * multiplier
+end
+
+local function calculateHitsToKill(health, damage)
+    if damage <= 0 then return "∞" end
+    local hits = math.ceil(health / damage)
+    return hits > 50 and "∞" or (hits < 1 and 1 or hits)
+end
+
+local function updateStats(targetPlayer)
+    if not targetPlayer then
+        Update.Text = "Strength: N/A"
+        Update1.Text = "Gems: N/A"
+        Update2.Text = "Rebirth: N/A"
+        Update3.Text = "Agility: N/A"
+        Update4.Text = "Durability: N/A"
+        Update5.Text = "Kills: N/A"
+        Update6.Text = "Muscle King Time: N/A"
+        Update9.Text = "Current Map: N/A"
+        Update10.Text = "Custom Size: N/A"
+        Update11.Text = "Custom Speed: N/A"
+        Update12.Text = "Evil Karma: N/A"
+        Update13.Text = "Good Karma: N/A"
+        enemyHealthLabel.Text = "Enemy life: N/A"
+        playerDamageLabel.Text = "Your damage: N/A"
+        hitsToKillLabel.Text = "Blows to kill him: N/A"
+        wildWizardLabel.Text = "Wild Wizard equipped: 0 (0 bonus)"
+        return
+    end
+
+    Update.Text = "Strength: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Strength") and FormatDisplay(targetPlayer.leaderstats.Strength.Value) or "N/A")
+    Update1.Text = "Gems: " .. (targetPlayer:FindFirstChild("Gems") and FormatDisplay(targetPlayer.Gems.Value) or "N/A")
+    Update2.Text = "Rebirth: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Rebirths") and FormatDisplay(targetPlayer.leaderstats.Rebirths.Value) or "N/A")
+    Update3.Text = "Agility: " .. (targetPlayer:FindFirstChild("Agility") and FormatDisplay(targetPlayer.Agility.Value) or "N/A")
+    Update4.Text = "Durability: " .. (targetPlayer:FindFirstChild("Durability") and FormatDisplay(targetPlayer.Durability.Value) or "N/A")
+    Update5.Text = "Kills: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Kills") and FormatDisplay(targetPlayer.leaderstats.Kills.Value) or "N/A")
+    Update6.Text = "Muscle King Time: " .. (targetPlayer:FindFirstChild("muscleKingTime") and FormatDisplay(targetPlayer.muscleKingTime.Value) or "N/A")
+    Update9.Text = "Current Map: " .. (targetPlayer:FindFirstChild("currentMap") and tostring(targetPlayer.currentMap.Value) or "N/A")
+    Update10.Text = "Custom Size: " .. (targetPlayer:FindFirstChild("customSize") and FormatDisplay(targetPlayer.customSize.Value) or "N/A")
+    Update11.Text = "Custom Speed: " .. (targetPlayer:FindFirstChild("customSpeed") and FormatDisplay(targetPlayer.customSpeed.Value) or "N/A")
+    Update12.Text = "Evil Karma: " .. (targetPlayer:FindFirstChild("evilKarma") and FormatDisplay(targetPlayer.evilKarma.Value) or "N/A")
+    Update13.Text = "Good Karma: " .. (targetPlayer:FindFirstChild("goodKarma") and FormatDisplay(targetPlayer.goodKarma.Value) or "N/A")
+
+    local enemyHealth = calculateEnemyHealth(targetPlayer)
+    local playerDamage = calculateLocalPlayerDamage()
+    local hitsToKill = calculateHitsToKill(enemyHealth, playerDamage)
+
+    enemyHealthLabel.Text = "Enemy life: " .. (enemyHealth > 0 and FormatDisplay(enemyHealth) or "N/A")
+    playerDamageLabel.Text = "Your damage: " .. (playerDamage > 0 and FormatDisplay(playerDamage) or "N/A")
+    hitsToKillLabel.Text = "Blows to kill him: " .. tostring(hitsToKill)
+end
+
+task.spawn(function()
+    while task.wait() do
+        local selectedPlayer = SelectPlayerName ~= "" and game.Players:FindFirstChild(SelectPlayerName)
+        updateStats(selectedPlayer)
+    end
+end)
+
 local MusicTab = window:AddTab("Music")
 
 local MP3_URL = ""
