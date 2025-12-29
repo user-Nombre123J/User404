@@ -1,6 +1,6 @@
 local whitelist = {
-    [""] = true,
-    [""] = true,
+    ["Johanx7_12"] = true,
+    ["Mex_ej"] = true,
     [""] = true, 
     [""] = true,
     [""] = true,
