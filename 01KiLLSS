@@ -46,6 +46,238 @@ local window = library:AddWindow(title, {
     min_size = Vector2.new(400, 870),
     can_resize = true,
 })
+local MainTab = window:AddTab("Main")
+MainTab:AddLabel("Important:").TextSize = 22
+
+local antiKnockbackSwitch =
+    MainTab:AddSwitch(
+    "Anti Fling",
+    function(bool)
+        if bool then
+            local playerName = game.Players.LocalPlayer.Name
+            local character = game.Workspace:FindFirstChild(playerName)
+            if character then
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    local bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                    bodyVelocity.P = 1250
+                    bodyVelocity.Parent = rootPart
+                end
+            end
+        else
+            local playerName = game.Players.LocalPlayer.Name
+            local character = game.Workspace:FindFirstChild(playerName)
+            if character then
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
+                    if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
+                        existingVelocity:Destroy()
+                    end
+                end
+            end
+        end
+    end
+)
+antiKnockbackSwitch:Set(true)
+
+local lockRunning = false
+local lockConnection
+
+local lockSwitch = MainTab:AddSwitch("Lock Position", function(Value)
+    local player = game.Players.LocalPlayer
+
+    if Value then
+        lockRunning = true
+        lockConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            local char = player.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChildOfClass("Humanoid") then return end
+
+            local hrp = char.HumanoidRootPart
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+            if not humanoid or not hrp then return end
+
+            if not humanoid:FindFirstChild("LockState") then
+                humanoid.WalkSpeed = 0
+                humanoid.JumpPower = 0
+                humanoid.AutoRotate = false
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                local marker = Instance.new("BoolValue", humanoid)
+                marker.Name = "LockState"
+                marker.Value = true
+                humanoid:SetAttribute("LockCFrame", hrp.CFrame)
+            end
+
+            local savedCFrame = humanoid:GetAttribute("LockCFrame")
+            if savedCFrame then
+                hrp.Velocity = Vector3.zero
+                hrp.RotVelocity = Vector3.zero
+                hrp.CFrame = savedCFrame
+            end
+        end)
+    else
+        lockRunning = false
+        if lockConnection then
+            lockConnection:Disconnect()
+            lockConnection = nil
+        end
+        local char = player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 250
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                if humanoid:FindFirstChild("LockState") then
+                    humanoid.LockState:Destroy()
+                end
+                humanoid:SetAttribute("LockCFrame", nil)
+            end
+        end
+    end
+end)
+
+lockSwitch:Set(false)
+
+
+local showpetsswitch =
+    MainTab:AddSwitch(
+    "Show Pets",
+    function(bool)
+        local player = game:GetService("Players").LocalPlayer
+        if player:FindFirstChild("hidePets") then
+            player.hidePets.Value = bool
+        end
+    end
+)
+showpetsswitch:Set(false)
+
+local showotherpetsswitch =
+    MainTab:AddSwitch(
+    "Show Other Pets",
+    function(bool)
+        local player = game:GetService("Players").LocalPlayer
+        if player:FindFirstChild("showOtherPetsOn") then
+            player.showOtherPetsOn.Value = bool
+        end
+    end
+)
+showotherpetsswitch:Set(false)
+
+MainTab:AddLabel("Misc:").TextSize = 22
+
+MainTab:AddSwitch(
+    "Infinite Jump",
+    function(bool)
+        _G.InfiniteJump = bool
+
+        if bool then
+            local InfiniteJumpConnection
+            InfiniteJumpConnection =
+                game:GetService("UserInputService").JumpRequest:Connect(
+                function()
+                    if _G.InfiniteJump then
+                        game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(
+                            "Jumping"
+                        )
+                    else
+                        InfiniteJumpConnection:Disconnect()
+                    end
+                end
+            )
+        end
+    end
+)
+
+local parts = {}
+local partSize = 2048
+local totalDistance = 50000
+local startPosition = Vector3.new(-2, -9.5, -2)
+
+local function createAllParts()
+    local numberOfParts = math.ceil(totalDistance / partSize)
+
+    for x = 0, numberOfParts - 1 do
+        for z = 0, numberOfParts - 1 do
+            local function createPart(pos, name)
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(partSize, 1, partSize)
+                part.Position = pos
+                part.Anchored = true
+                part.Transparency = 1
+                part.CanCollide = true
+                part.Name = name
+                part.Parent = workspace
+                return part
+            end
+
+            table.insert(
+                parts,
+                createPart(startPosition + Vector3.new(x * partSize, 0, z * partSize), "Part_Side_" .. x .. "_" .. z)
+            )
+            table.insert(
+                parts,
+                createPart(
+                    startPosition + Vector3.new(-x * partSize, 0, z * partSize),
+                    "Part_LeftRight_" .. x .. "_" .. z
+                )
+            )
+            table.insert(
+                parts,
+                createPart(
+                    startPosition + Vector3.new(-x * partSize, 0, -z * partSize),
+                    "Part_UpLeft_" .. x .. "_" .. z
+                )
+            )
+            table.insert(
+                parts,
+                createPart(
+                    startPosition + Vector3.new(x * partSize, 0, -z * partSize),
+                    "Part_UpRight_" .. x .. "_" .. z
+                )
+            )
+        end
+    end
+end
+task.spawn(createAllParts)
+
+local walkonwaterSwicth =
+    MainTab:AddSwitch(
+    "Walk on Water",
+    function(bool)
+        for _, part in ipairs(parts) do
+            if part and part.Parent then
+                part.CanCollide = bool
+            end
+        end
+    end
+)
+walkonwaterSwicth:Set(true)
+
+local timeDropdown =
+    MainTab:AddDropdown(
+    "Change Time",
+    function(selection)
+        local lighting = game:GetService("Lighting")
+
+        if selection == "Night" then
+            lighting.ClockTime = 0
+        elseif selection == "Day" then
+            lighting.ClockTime = 12
+        elseif selection == "Midnight" then
+            lighting.ClockTime = 6
+        end
+    end
+)
+
+timeDropdown:Add("Night")
+timeDropdown:Add("Day")
+timeDropdown:Add("Midnight")
+
 local Killer = window:AddTab("Kill")
 
 local Players = game:GetService("Players")
