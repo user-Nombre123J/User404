@@ -1016,6 +1016,29 @@ Killer:AddSwitch("Auto Punch (Equip Loop)", function(state)
     end)
 end)
 
+_G.AutoReset = false
+
+Killer:AddSwitch("Auto Reset", function(state)
+    _G.AutoReset = state
+
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local LP = Players.LocalPlayer
+
+    task.spawn(function()
+        while _G.AutoReset do
+            local char = LP.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+            if hum and hum.Health > 0 then
+                hum.Health = 0 -- RESET
+            end
+
+            task.wait(1) -- tiempo entre resets (ajústalo)
+        end
+    end)
+end)
+
 local godModeToggle = false
 Killer:AddSwitch("God mode", function(State)
     godModeToggle = State
