@@ -33,7 +33,7 @@ local title = ("KILLS PIVATE BY JOHAN | WELCOME - %s"):format(displayName)
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/user-Nombre123J/User-404/refs/heads/main/Librery%20angel"))()
 
 local window = library:AddWindow(title, {
-    main_color = Color3.fromRGB(255, 255, 255),
+    main_color = Color3.fromRGB(0, 0, 0),
     min_size = Vector2.new(480, 870),
     can_resize = true,
 })
