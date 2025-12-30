@@ -28,13 +28,13 @@ if not displayName or displayName == "" then
 end
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local title = ("KILLS OP PRIVATE BY JOHAN | WELCOME - %s"):format(displayName)
+local title = ("KILLS OP PRIVATE | Hello %s"):format(displayName)
 
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/user-Nombre123J/User-404/refs/heads/main/Librery%20angel"))()
 
 local window = library:AddWindow(title, {
     main_color = Color3.fromRGB(0, 0, 0),
-    min_size = Vector2.new(560, 870),
+    min_size = Vector2.new(480, 870),
     can_resize = true,
 })
 local MainTab = window:AddTab("Main")
@@ -333,7 +333,7 @@ Killer:AddSwitch("Auto Whitelist Friends", function(state)
             if player ~= LocalPlayer and LocalPlayer:IsFriendsWith(player.UserId) then
                 if not table.find(_G.whitelistedPlayers, player.Name) then
                     table.insert(_G.whitelistedPlayers, player.Name)
-                    print(player.Name .. " (amigo) aÃƒÂ±adido a Whitelist")
+                    print(player.Name .. " (amigo) aÃ±adido a Whitelist")
                 end
             end
         end
@@ -342,7 +342,7 @@ Killer:AddSwitch("Auto Whitelist Friends", function(state)
             if friendWhitelistActive and player ~= LocalPlayer and LocalPlayer:IsFriendsWith(player.UserId) then
                 if not table.find(_G.whitelistedPlayers, player.Name) then
                     table.insert(_G.whitelistedPlayers, player.Name)
-                    print(player.Name .. " (amigo) aÃƒÂ±adido a Whitelist")
+                    print(player.Name .. " (amigo) aÃ±adido a Whitelist")
                 end
             end
         end)
@@ -478,7 +478,7 @@ local function rotateLoop()
     end
 end
 
-Killer:AddSwitch("Auto cambiar pet de daÃ±o y vida", function(Value)
+Killer:AddSwitch("Auto cambiar pet de daño y vida", function(Value)
     running = Value
     if Value then
         task.spawn(rotateLoop)
@@ -493,7 +493,7 @@ Killer:AddSwitch("Block touch Egg", function(Value)
     local BLOCKED_TOOL_NAME = "Protein Egg"
 
     if not Value then
-        print("Bloqueo del Protein Egg: DESACTIVADO âŒ")
+        print("Bloqueo del Protein Egg: DESACTIVADO ❌")
         return
     end
 
@@ -1024,7 +1024,7 @@ local followDropdown = Killer:AddDropdown("Teleport player", function(selectedDi
         if target then
             followTarget = target.Name
             following = true
-            print("Ã¢Å“â€¦ Started following:", target.Name)
+            print("âœ… Started following:", target.Name)
             followPlayer(target)
         end
     end
@@ -1059,7 +1059,7 @@ end)
 Killer:AddButton("Dejar de Seguir", function()
     following = false
     followTarget = nil
-    print("Ã¢â€ºâ€ Stopped following")
+    print("â›” Stopped following")
 end)
 
 task.spawn(function()
@@ -1118,7 +1118,7 @@ end)
 
 Killer:AddSwitch("Activate Dead Hit", function(Value)
     _G.AutoScripts = Value
-    print("AutoScripts " .. (_G.AutoScripts and "ACTIVADO" or "DESACTIVADO âŒ"))
+    print("AutoScripts " .. (_G.AutoScripts and "ACTIVADO" or "DESACTIVADO ❌"))
 
     local Players = game:GetService("Players")
     local RunService = game:GetService("RunService")
@@ -1547,7 +1547,7 @@ local Update11 = estadisticas:AddLabel("")
 local Update12 = estadisticas:AddLabel("")
 local Update13 = estadisticas:AddLabel("")
 
-estadisticas:AddLabel("â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”")
+estadisticas:AddLabel("————————————————————————————")
 estadisticas:AddLabel("Stats Advanced").TextSize = 24
 
 local enemyHealthLabel = estadisticas:AddLabel("Enemy life: N/A")
@@ -1605,9 +1605,9 @@ local function calculateEnemyHealth(targetPlayer)
 end
 
 local function calculateHitsToKill(health, damage)
-    if damage <= 0 then return "âˆž" end
+    if damage <= 0 then return "∞" end
     local hits = math.ceil(health / damage)
-    return hits > 50 and "âˆž" or (hits < 1 and 1 or hits)
+    return hits > 50 and "∞" or (hits < 1 and 1 or hits)
 end
 
 local function updateStats(targetPlayer)
@@ -1690,7 +1690,7 @@ local function formatTime(sec)
 	return string.format("%02d:%02d", m, s)
 end
 
-local TimeLabel = MusicTab:AddLabel("â±ï¸ 00:00 / 00:00")
+local TimeLabel = MusicTab:AddLabel("⏱️ 00:00 / 00:00")
 
 local function loadMP3(url)
 	if url == "" then return end
@@ -1727,7 +1727,7 @@ end
 task.spawn(function()
 	while task.wait(0.1) do
 		if currentSound and currentSound:IsDescendantOf(SoundService) and currentSound.IsLoaded then
-			TimeLabel.Text = "â±ï¸ " .. formatTime(currentSound.TimePosition) .. " / " .. formatTime(currentSound.TimeLength)
+			TimeLabel.Text = "⏱️ " .. formatTime(currentSound.TimePosition) .. " / " .. formatTime(currentSound.TimeLength)
 
 			if not currentSound.IsPlaying and not isPaused and currentSound.TimePosition > 0 and currentSound.TimePosition >= currentSound.TimeLength - 0.2 then
 				currentIndex = currentIndex + 1
@@ -1986,5 +1986,8 @@ teleport:AddButton("Brawl Regular", function()
         Duration = 0
     })
 end)
+
+
+
 
 
