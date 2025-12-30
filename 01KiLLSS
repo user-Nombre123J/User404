@@ -1018,6 +1018,53 @@ end)
 
 _G.AutoReset = false
 
+_G.AutoPunch = false
+
+Killer:AddSwitch("Auto Punch FAST", function(state)
+    _G.AutoPunch = state
+
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local LP = Players.LocalPlayer
+
+    -- AJUSTES DE VELOCIDAD
+    local EQUIP_DELAY = 0.01   -- equip / unequip (más bajo = más rápido)
+    local PUNCH_DELAY = 0      -- delay antes del golpe (0 = máximo)
+
+    task.spawn(function()
+        while _G.AutoPunch do
+            local char = LP.Character
+            local bp = LP:FindFirstChild("Backpack")
+
+            if char and bp then
+                -- CAMBIA "Punch" SI TU TOOL TIENE OTRO NOMBRE
+                local tool = char:FindFirstChild("Punch")
+                    or bp:FindFirstChild("Punch")
+                    or char:FindFirstChildOfClass("Tool")
+                    or bp:FindFirstChildOfClass("Tool")
+
+                if tool then
+                    -- EQUIPAR
+                    tool.Parent = char
+                    if EQUIP_DELAY > 0 then task.wait(EQUIP_DELAY) end
+
+                    -- PEGAR (click automático)
+                    pcall(function()
+                        tool:Activate()
+                    end)
+
+                    if PUNCH_DELAY > 0 then task.wait(PUNCH_DELAY) end
+
+                    -- DESEQUIPAR
+                    tool.Parent = bp
+                end
+            end
+
+            RunService.Heartbeat:Wait() -- ciclo más rápido posible
+        end
+    end)
+end)
+
 Killer:AddSwitch("Auto Reset", function(state)
     _G.AutoReset = state
 
