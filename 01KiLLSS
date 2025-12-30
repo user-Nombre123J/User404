@@ -972,6 +972,33 @@ Killer:AddSwitch("Auto Punch NoAnim", function(state)
         end
     end)
 end)
+Killer:AddSwitch("Ganar golpe en size 2", function(state)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local enabled = true -- ponlo en false para apagar
+
+task.spawn(function()
+    while enabled do
+        local character = LocalPlayer.Character
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+
+        if character and backpack then
+            local tool = backpack:FindFirstChildOfClass("Tool")
+            if tool then
+                -- Equipar
+                tool.Parent = character
+                task.wait(0.05)
+
+                -- Desequipar
+                tool.Parent = backpack
+                task.wait(0.05)
+            end
+        end
+
+        task.wait(0.05)
+    end
+end)
 
 
 local godModeToggle = false
