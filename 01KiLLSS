@@ -28,7 +28,7 @@ if not displayName or displayName == "" then
 end
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local title = ("Kill private| Hello %s"):format(displayName)
+local title = ("KILLS PIVATE BY JOHAN | WELCOME - %s"):format(displayName)
 
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/p4020854-hub/Lb/refs/heads/main/X", true))()
 
