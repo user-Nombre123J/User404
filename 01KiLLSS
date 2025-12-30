@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 local whitelist = loadstring(game:HttpGet(
-  "https://raw.githubusercontent.com/user-Nombre123J/Whitelist-/refs/heads/main/Whitelist.lua2"
+    "https://raw.githubusercontent.com/user-Nombre123J/Whitelist-/refs/heads/main/Whitelist.lua2"
 ))()
 
 if not whitelist[LocalPlayer.Name] then
@@ -11,7 +11,7 @@ if not whitelist[LocalPlayer.Name] then
 end
 
 -- Desde aquí sí carga el script
-print("✔️Acceso concedido a:", LocalPlayer.Name)
+print("Acceso concedido a:", LocalPlayer.Name)
 local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
 
@@ -28,15 +28,247 @@ if not displayName or displayName == "" then
 end
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local title = ("KILLS PIVATE BY JOHAN | WELCOME - %s"):format(displayName)
+local title = ("KILLS OP PRIVATE BY JOHAN | WELCOME - %s"):format(displayName)
 
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/user-Nombre123J/User-404/refs/heads/main/Librery%20angel"))()
 
 local window = library:AddWindow(title, {
     main_color = Color3.fromRGB(0, 0, 0),
-    min_size = Vector2.new(480, 870),
+    min_size = Vector2.new(560, 870),
     can_resize = true,
 })
+local MainTab = window:AddTab("Main")
+MainTab:AddLabel("Important:").TextSize = 22
+
+local antiKnockbackSwitch =
+    MainTab:AddSwitch(
+    "Anti Fling",
+    function(bool)
+        if bool then
+            local playerName = game.Players.LocalPlayer.Name
+            local character = game.Workspace:FindFirstChild(playerName)
+            if character then
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    local bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                    bodyVelocity.P = 1250
+                    bodyVelocity.Parent = rootPart
+                end
+            end
+        else
+            local playerName = game.Players.LocalPlayer.Name
+            local character = game.Workspace:FindFirstChild(playerName)
+            if character then
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
+                    if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
+                        existingVelocity:Destroy()
+                    end
+                end
+            end
+        end
+    end
+)
+antiKnockbackSwitch:Set(true)
+
+local lockRunning = false
+local lockConnection
+
+local lockSwitch = MainTab:AddSwitch("Lock Position", function(Value)
+    local player = game.Players.LocalPlayer
+
+    if Value then
+        lockRunning = true
+        lockConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            local char = player.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChildOfClass("Humanoid") then return end
+
+            local hrp = char.HumanoidRootPart
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+            if not humanoid or not hrp then return end
+
+            if not humanoid:FindFirstChild("LockState") then
+                humanoid.WalkSpeed = 0
+                humanoid.JumpPower = 0
+                humanoid.AutoRotate = false
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                local marker = Instance.new("BoolValue", humanoid)
+                marker.Name = "LockState"
+                marker.Value = true
+                humanoid:SetAttribute("LockCFrame", hrp.CFrame)
+            end
+
+            local savedCFrame = humanoid:GetAttribute("LockCFrame")
+            if savedCFrame then
+                hrp.Velocity = Vector3.zero
+                hrp.RotVelocity = Vector3.zero
+                hrp.CFrame = savedCFrame
+            end
+        end)
+    else
+        lockRunning = false
+        if lockConnection then
+            lockConnection:Disconnect()
+            lockConnection = nil
+        end
+        local char = player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 250
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                if humanoid:FindFirstChild("LockState") then
+                    humanoid.LockState:Destroy()
+                end
+                humanoid:SetAttribute("LockCFrame", nil)
+            end
+        end
+    end
+end)
+
+lockSwitch:Set(false)
+
+
+local showpetsswitch =
+    MainTab:AddSwitch(
+    "Show Pets",
+    function(bool)
+        local player = game:GetService("Players").LocalPlayer
+        if player:FindFirstChild("hidePets") then
+            player.hidePets.Value = bool
+        end
+    end
+)
+showpetsswitch:Set(false)
+
+local showotherpetsswitch =
+    MainTab:AddSwitch(
+    "Show Other Pets",
+    function(bool)
+        local player = game:GetService("Players").LocalPlayer
+        if player:FindFirstChild("showOtherPetsOn") then
+            player.showOtherPetsOn.Value = bool
+        end
+    end
+)
+showotherpetsswitch:Set(false)
+
+MainTab:AddLabel("Misc:").TextSize = 22
+
+MainTab:AddSwitch(
+    "Infinite Jump",
+    function(bool)
+        _G.InfiniteJump = bool
+
+        if bool then
+            local InfiniteJumpConnection
+            InfiniteJumpConnection =
+                game:GetService("UserInputService").JumpRequest:Connect(
+                function()
+                    if _G.InfiniteJump then
+                        game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(
+                            "Jumping"
+                        )
+                    else
+                        InfiniteJumpConnection:Disconnect()
+                    end
+                end
+            )
+        end
+    end
+)
+
+local parts = {}
+local partSize = 2048
+local totalDistance = 50000
+local startPosition = Vector3.new(-2, -9.5, -2)
+
+local function createAllParts()
+    local numberOfParts = math.ceil(totalDistance / partSize)
+
+    for x = 0, numberOfParts - 1 do
+        for z = 0, numberOfParts - 1 do
+            local function createPart(pos, name)
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(partSize, 1, partSize)
+                part.Position = pos
+                part.Anchored = true
+                part.Transparency = 1
+                part.CanCollide = true
+                part.Name = name
+                part.Parent = workspace
+                return part
+            end
+
+            table.insert(
+                parts,
+                createPart(startPosition + Vector3.new(x * partSize, 0, z * partSize), "Part_Side_" .. x .. "_" .. z)
+            )
+            table.insert(
+                parts,
+                createPart(
+                    startPosition + Vector3.new(-x * partSize, 0, z * partSize),
+                    "Part_LeftRight_" .. x .. "_" .. z
+                )
+            )
+            table.insert(
+                parts,
+                createPart(
+                    startPosition + Vector3.new(-x * partSize, 0, -z * partSize),
+                    "Part_UpLeft_" .. x .. "_" .. z
+                )
+            )
+            table.insert(
+                parts,
+                createPart(
+                    startPosition + Vector3.new(x * partSize, 0, -z * partSize),
+                    "Part_UpRight_" .. x .. "_" .. z
+                )
+            )
+        end
+    end
+end
+task.spawn(createAllParts)
+
+local walkonwaterSwicth =
+    MainTab:AddSwitch(
+    "Walk on Water",
+    function(bool)
+        for _, part in ipairs(parts) do
+            if part and part.Parent then
+                part.CanCollide = bool
+            end
+        end
+    end
+)
+walkonwaterSwicth:Set(true)
+
+local timeDropdown =
+    MainTab:AddDropdown(
+    "Change Time",
+    function(selection)
+        local lighting = game:GetService("Lighting")
+
+        if selection == "Night" then
+            lighting.ClockTime = 0
+        elseif selection == "Day" then
+            lighting.ClockTime = 12
+        elseif selection == "Midnight" then
+            lighting.ClockTime = 6
+        end
+    end
+)
+
+timeDropdown:Add("Night")
+timeDropdown:Add("Day")
+timeDropdown:Add("Midnight")
+
 local Killer = window:AddTab("Kill")
 
 local Players = game:GetService("Players")
@@ -101,7 +333,7 @@ Killer:AddSwitch("Auto Whitelist Friends", function(state)
             if player ~= LocalPlayer and LocalPlayer:IsFriendsWith(player.UserId) then
                 if not table.find(_G.whitelistedPlayers, player.Name) then
                     table.insert(_G.whitelistedPlayers, player.Name)
-                    print(player.Name .. " (amigo) aÃ±adido a Whitelist")
+                    print(player.Name .. " (amigo) aÃƒÂ±adido a Whitelist")
                 end
             end
         end
@@ -110,7 +342,7 @@ Killer:AddSwitch("Auto Whitelist Friends", function(state)
             if friendWhitelistActive and player ~= LocalPlayer and LocalPlayer:IsFriendsWith(player.UserId) then
                 if not table.find(_G.whitelistedPlayers, player.Name) then
                     table.insert(_G.whitelistedPlayers, player.Name)
-                    print(player.Name .. " (amigo) aÃ±adido a Whitelist")
+                    print(player.Name .. " (amigo) aÃƒÂ±adido a Whitelist")
                 end
             end
         end)
@@ -246,7 +478,7 @@ local function rotateLoop()
     end
 end
 
-Killer:AddSwitch("Auto cambiar pet de daño y vida", function(Value)
+Killer:AddSwitch("Auto cambiar pet de daÃ±o y vida", function(Value)
     running = Value
     if Value then
         task.spawn(rotateLoop)
@@ -261,7 +493,7 @@ Killer:AddSwitch("Block touch Egg", function(Value)
     local BLOCKED_TOOL_NAME = "Protein Egg"
 
     if not Value then
-        print("Bloqueo del Protein Egg: DESACTIVADO ❌")
+        print("Bloqueo del Protein Egg: DESACTIVADO âŒ")
         return
     end
 
@@ -792,7 +1024,7 @@ local followDropdown = Killer:AddDropdown("Teleport player", function(selectedDi
         if target then
             followTarget = target.Name
             following = true
-            print("âœ… Started following:", target.Name)
+            print("Ã¢Å“â€¦ Started following:", target.Name)
             followPlayer(target)
         end
     end
@@ -827,7 +1059,7 @@ end)
 Killer:AddButton("Dejar de Seguir", function()
     following = false
     followTarget = nil
-    print("â›” Stopped following")
+    print("Ã¢â€ºâ€ Stopped following")
 end)
 
 task.spawn(function()
@@ -886,7 +1118,7 @@ end)
 
 Killer:AddSwitch("Activate Dead Hit", function(Value)
     _G.AutoScripts = Value
-    print("AutoScripts " .. (_G.AutoScripts and "ACTIVADO" or "DESACTIVADO ❌"))
+    print("AutoScripts " .. (_G.AutoScripts and "ACTIVADO" or "DESACTIVADO âŒ"))
 
     local Players = game:GetService("Players")
     local RunService = game:GetService("RunService")
@@ -1269,6 +1501,165 @@ Players.PlayerAdded:Connect(function(plr)
 	end)
 end)
 
+local estadisticas = window:AddTab("Stats")
+local SelectPlayerName = ""
+
+local PlayerDrop = estadisticas:AddDropdown("Select Player", function(Value)
+    SelectPlayerName = Value:match("| (.+)")
+end)
+
+for _, Plr in pairs(game.Players:GetPlayers()) do
+    PlayerDrop:Add(Plr.DisplayName .. " | " .. Plr.Name)
+end
+
+game.Players.PlayerAdded:Connect(function(Plr)
+    PlayerDrop:Add(Plr.DisplayName .. " | " .. Plr.Name)
+end)
+
+local function FormatNumberWithCommas(number)
+    return tostring(number):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+end
+
+local function FormatAbbreviated(number)
+    local abbr = {"", "K", "M", "B", "T", "Qa", "Qi"}
+    local idx = 1
+    while number >= 1000 and idx < #abbr do
+        number = number / 1000
+        idx += 1
+    end
+    return string.format("%.2f", number) .. abbr[idx]
+end
+
+local function FormatDisplay(value)
+    return "[ " .. FormatNumberWithCommas(value) .. " | " .. FormatAbbreviated(value) .. " ]"
+end
+
+local Update = estadisticas:AddLabel("")
+local Update1 = estadisticas:AddLabel("")
+local Update2 = estadisticas:AddLabel("")
+local Update3 = estadisticas:AddLabel("")
+local Update4 = estadisticas:AddLabel("")
+local Update5 = estadisticas:AddLabel("")
+local Update6 = estadisticas:AddLabel("")
+local Update9 = estadisticas:AddLabel("")
+local Update10 = estadisticas:AddLabel("")
+local Update11 = estadisticas:AddLabel("")
+local Update12 = estadisticas:AddLabel("")
+local Update13 = estadisticas:AddLabel("")
+
+estadisticas:AddLabel("â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”")
+estadisticas:AddLabel("Stats Advanced").TextSize = 24
+
+local enemyHealthLabel = estadisticas:AddLabel("Enemy life: N/A")
+enemyHealthLabel.TextSize = 20
+enemyHealthLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local playerDamageLabel = estadisticas:AddLabel("Your damage: N/A")
+playerDamageLabel.TextSize = 20
+playerDamageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local hitsToKillLabel = estadisticas:AddLabel("Blows to kill him: N/A")
+hitsToKillLabel.TextSize = 20
+hitsToKillLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local wildWizardLabel = estadisticas:AddLabel("Wild Wizard equipped: 0 (0 bonus)")
+wildWizardLabel.TextSize = 18
+
+local function countEquipped(player, petName)
+    local equipped = player:FindFirstChild("equippedPets")
+    if not equipped then return 0 end
+    local count = 0
+    for _, slot in pairs(equipped:GetChildren()) do
+        if slot:FindFirstChild("petReference") and slot.petReference.Value then
+            local pet = slot.petReference.Value
+            if pet.Name == petName then
+                count += 1
+            end
+        end
+    end
+    return count
+end
+
+local function calculateLocalPlayerDamage()
+    local Player = game.Players.LocalPlayer
+    local strength = Player:FindFirstChild("leaderstats") and Player.leaderstats:FindFirstChild("Strength")
+    if not strength then return 0 end
+
+    local baseDamage = strength.Value * 0.1
+    local wildCount = countEquipped(Player, "Wild Wizard")
+    local wildBonus = wildCount * 0.33
+    wildWizardLabel.Text = "Wild Wizard equipped: "..wildCount.." ("..FormatDisplay(baseDamage*wildBonus).." bonus)"
+
+    return baseDamage * (1 + wildBonus)
+end
+
+local function calculateEnemyHealth(targetPlayer)
+    if not targetPlayer then return 0 end
+    local baseDura = targetPlayer:FindFirstChild("Durability") and targetPlayer.Durability.Value or 0
+    local ultFolder = targetPlayer:FindFirstChild("ultimatesFolder")
+    local multiplier = 1
+    if ultFolder and ultFolder:FindFirstChild("Infernal Health") then
+        multiplier = multiplier + 0.15 * ultFolder["Infernal Health"].Value
+    end
+    return baseDura * multiplier
+end
+
+local function calculateHitsToKill(health, damage)
+    if damage <= 0 then return "âˆž" end
+    local hits = math.ceil(health / damage)
+    return hits > 50 and "âˆž" or (hits < 1 and 1 or hits)
+end
+
+local function updateStats(targetPlayer)
+    if not targetPlayer then
+        Update.Text = "Strength: N/A"
+        Update1.Text = "Gems: N/A"
+        Update2.Text = "Rebirth: N/A"
+        Update3.Text = "Agility: N/A"
+        Update4.Text = "Durability: N/A"
+        Update5.Text = "Kills: N/A"
+        Update6.Text = "Muscle King Time: N/A"
+        Update9.Text = "Current Map: N/A"
+        Update10.Text = "Custom Size: N/A"
+        Update11.Text = "Custom Speed: N/A"
+        Update12.Text = "Evil Karma: N/A"
+        Update13.Text = "Good Karma: N/A"
+        enemyHealthLabel.Text = "Enemy life: N/A"
+        playerDamageLabel.Text = "Your damage: N/A"
+        hitsToKillLabel.Text = "Blows to kill him: N/A"
+        wildWizardLabel.Text = "Wild Wizard equipped: 0 (0 bonus)"
+        return
+    end
+
+    Update.Text = "Strength: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Strength") and FormatDisplay(targetPlayer.leaderstats.Strength.Value) or "N/A")
+    Update1.Text = "Gems: " .. (targetPlayer:FindFirstChild("Gems") and FormatDisplay(targetPlayer.Gems.Value) or "N/A")
+    Update2.Text = "Rebirth: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Rebirths") and FormatDisplay(targetPlayer.leaderstats.Rebirths.Value) or "N/A")
+    Update3.Text = "Agility: " .. (targetPlayer:FindFirstChild("Agility") and FormatDisplay(targetPlayer.Agility.Value) or "N/A")
+    Update4.Text = "Durability: " .. (targetPlayer:FindFirstChild("Durability") and FormatDisplay(targetPlayer.Durability.Value) or "N/A")
+    Update5.Text = "Kills: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Kills") and FormatDisplay(targetPlayer.leaderstats.Kills.Value) or "N/A")
+    Update6.Text = "Muscle King Time: " .. (targetPlayer:FindFirstChild("muscleKingTime") and FormatDisplay(targetPlayer.muscleKingTime.Value) or "N/A")
+    Update9.Text = "Current Map: " .. (targetPlayer:FindFirstChild("currentMap") and tostring(targetPlayer.currentMap.Value) or "N/A")
+    Update10.Text = "Custom Size: " .. (targetPlayer:FindFirstChild("customSize") and FormatDisplay(targetPlayer.customSize.Value) or "N/A")
+    Update11.Text = "Custom Speed: " .. (targetPlayer:FindFirstChild("customSpeed") and FormatDisplay(targetPlayer.customSpeed.Value) or "N/A")
+    Update12.Text = "Evil Karma: " .. (targetPlayer:FindFirstChild("evilKarma") and FormatDisplay(targetPlayer.evilKarma.Value) or "N/A")
+    Update13.Text = "Good Karma: " .. (targetPlayer:FindFirstChild("goodKarma") and FormatDisplay(targetPlayer.goodKarma.Value) or "N/A")
+
+    local enemyHealth = calculateEnemyHealth(targetPlayer)
+    local playerDamage = calculateLocalPlayerDamage()
+    local hitsToKill = calculateHitsToKill(enemyHealth, playerDamage)
+
+    enemyHealthLabel.Text = "Enemy life: " .. (enemyHealth > 0 and FormatDisplay(enemyHealth) or "N/A")
+    playerDamageLabel.Text = "Your damage: " .. (playerDamage > 0 and FormatDisplay(playerDamage) or "N/A")
+    hitsToKillLabel.Text = "Blows to kill him: " .. tostring(hitsToKill)
+end
+
+task.spawn(function()
+    while task.wait() do
+        local selectedPlayer = SelectPlayerName ~= "" and game.Players:FindFirstChild(SelectPlayerName)
+        updateStats(selectedPlayer)
+    end
+end)
+
 local MusicTab = window:AddTab("Music")
 
 local MP3_URL = ""
@@ -1299,7 +1690,7 @@ local function formatTime(sec)
 	return string.format("%02d:%02d", m, s)
 end
 
-local TimeLabel = MusicTab:AddLabel("⏱️ 00:00 / 00:00")
+local TimeLabel = MusicTab:AddLabel("â±ï¸ 00:00 / 00:00")
 
 local function loadMP3(url)
 	if url == "" then return end
@@ -1336,7 +1727,7 @@ end
 task.spawn(function()
 	while task.wait(0.1) do
 		if currentSound and currentSound:IsDescendantOf(SoundService) and currentSound.IsLoaded then
-			TimeLabel.Text = "⏱️ " .. formatTime(currentSound.TimePosition) .. " / " .. formatTime(currentSound.TimeLength)
+			TimeLabel.Text = "â±ï¸ " .. formatTime(currentSound.TimePosition) .. " / " .. formatTime(currentSound.TimeLength)
 
 			if not currentSound.IsPlaying and not isPaused and currentSound.TimePosition > 0 and currentSound.TimePosition >= currentSound.TimeLength - 0.2 then
 				currentIndex = currentIndex + 1
@@ -1595,3 +1986,5 @@ teleport:AddButton("Brawl Regular", function()
         Duration = 0
     })
 end)
+
+
