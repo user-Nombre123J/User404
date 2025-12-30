@@ -973,6 +973,40 @@ Killer:AddSwitch("Auto Punch NoAnim", function(state)
     end)
 end)
 
+_G.FastEquip = false
+
+Killer:AddSwitch("Fast Equip Punch", function(state)
+    _G.FastEquip = state
+
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local LP = Players.LocalPlayer
+
+    task.spawn(function()
+        while _G.FastEquip do
+            local char = LP.Character
+            local bp = LP:FindFirstChild("Backpack")
+
+            if char and bp then
+                -- CAMBIA "Punch" SI TU TOOL TIENE OTRO NOMBRE
+                local tool = char:FindFirstChild("Punch")
+                    or bp:FindFirstChild("Punch")
+
+                if tool then
+                    -- DESEQUIPAR
+                    tool.Parent = bp
+                    task.wait(0.01)
+
+                    -- EQUIPAR
+                    tool.Parent = char
+                end
+            end
+
+            RunService.Heartbeat:Wait()
+        end
+    end)
+end)
+
 _G.AutoPunch = false
 
 Killer:AddSwitch("Auto Punch (Equip Loop)", function(state)
