@@ -973,31 +973,43 @@ Killer:AddSwitch("Auto Punch NoAnim", function(state)
     end)
 end)
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+-- VARIABLE GLOBAL
+_G.AutoPunch = false
 
-local enabled = true -- ponlo en false para apagar
+Killer:AddSwitch("Auto Punch (Equip/Unequip)", function(state)
+    _G.AutoPunch = state
 
-task.spawn(function()
-    while enabled do
-        local character = LocalPlayer.Character
-        local backpack = LocalPlayer:FindFirstChild("Backpack")
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local LP = Players.LocalPlayer
 
-        if character and backpack then
-            local tool = backpack:FindFirstChildOfClass("Tool")
-            if tool then
-                -- Equipar
-                tool.Parent = character
-                task.wait(0.05)
+    -- FUNCIÓN PARA EQUIPAR / DESEQUIPAR
+    local function cycleTool()
+        local char = LP.Character
+        local bp = LP:FindFirstChild("Backpack")
 
-                -- Desequipar
-                tool.Parent = backpack
-                task.wait(0.05)
-            end
+        if not char or not bp then return end
+
+        local tool = char:FindFirstChildOfClass("Tool")
+            or bp:FindFirstChildOfClass("Tool")
+
+        if tool then
+            -- Desequipar
+            tool.Parent = bp
+            task.wait(0.05)
+
+            -- Equipar
+            tool.Parent = char
         end
-
-        task.wait(0.05)
     end
+
+    -- LOOP CONTROLADO POR SWITCH
+    task.spawn(function()
+        while _G.AutoPunch do
+            cycleTool()
+            RunService.Heartbeat:Wait()
+        end
+    end)
 end)
 
 local godModeToggle = false
