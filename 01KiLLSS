@@ -972,7 +972,7 @@ Killer:AddSwitch("Auto Punch NoAnim", function(state)
         end
     end)
 end)
-Killer:AddSwitch("Ganar golpe en size 2", function(state)
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -999,7 +999,6 @@ task.spawn(function()
         task.wait(0.05)
     end
 end)
-
 
 local godModeToggle = false
 Killer:AddSwitch("God mode", function(State)
