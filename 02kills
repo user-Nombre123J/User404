@@ -1,4 +1,18 @@
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local whitelist = loadstring(game:HttpGet(
+ "https://raw.githubusercontent.com/user-Nombre123J/Whitelist-/refs/heads/main/Whitelist3.0"
+))()
+
+if not whitelist[LocalPlayer.Name] then
+    LocalPlayer:Kick("🔒 Script privado")
+    return
+end
+
+-- Desde aquí sí carga el script
+print("Acceso concedido a:", LocalPlayer.Name)
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
