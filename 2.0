@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-
 local whitelist = loadstring(game:HttpGet(
  "https://raw.githubusercontent.com/user-Nombre123J/Whitelist-/refs/heads/main/Whitelist4.0"))()
 
